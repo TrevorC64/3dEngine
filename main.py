@@ -1,49 +1,44 @@
 import tkinter as tk
-
-class Vector():
-    def __init__(self, x, y, z):
-        self.pos = (x, y, z)
-    
-    def __add__(self, other):
-        if(type(self) == type(other)):
-            return Vector(self.pos[0] + other.pos[0], self.pos[1] + other.pos[1], self.pos[2] + other.pos[2])
-    
-    def __repr__(self):
-        return f"{(self.pos)}"
-
-class Triangle():
-    def __init__(self, p1, p2, p3):
-        self.points = (p1, p2, p3)
-    
-    def __repr__(self):
-        return f"{(self.points)}"
-
-class Mesh():
-    def __init__(self, tris):
-        self.triangles = tris
-    
-    def __repr__(self):           
-        for t in self.triangles:
-            print(t)
-        return ""
-    
-    def __str__(self):           
-        for t in self.triangles:
-            print(t)
-        return ""
-
-
+from vector import *
+from matrix import *
+from threedparts import *
 
 class Engine():
-    def __init__(self):
-        self.window = tk.Tk()
-        self.window.mainloop()
+    def __init__(self, mesh):
+        self.root = tk.Tk()
+        self.height, self.width = 750, 750
+        self.scale = 100
+        self.canvas = tk.Canvas(self.root, bg="black", height=self.height, width=self.width)
+        self.render(mesh)
+        self.canvas.pack()
+        self.root.mainloop()
+
+    def rotate(self, v, theta):
+        rm = Matrix([0]).rotMat(theta)
+        return rm* v
 
 
-tris = [Triangle(Vector(0, 0, 0), Vector(1, 0, 0), Vector(0, 1, 0)), Triangle(Vector(1, 1, 0), Vector(1, 0, 0), Vector(0, 1, 0))]
+    
+    def draw_line(self, v1, v2):
+        shiftx = int(self.width/2)
+        shifty = int(self.height/2)
+        v1 = self.rotate(v1, 45)
+        v2 = self.rotate(v2, 45)
 
-square = Mesh(tris)
+        self.canvas.create_line(((v1.x*self.scale) + shiftx)/v1.z, ((v1.y*self.scale) + shifty)/v1.z, ((v2.x*self.scale) + shiftx)/v2.z, ((v2.y*self.scale) + shifty)/v2.z, fill="green")
 
-print(square)
+    def render(self, mesh):
+        self.obj = mesh
+        for i in range(len(mesh.triangles)):
+            triangle = mesh.triangles[i]
+            self.draw_line(triangle(0), triangle(1))
+            self.draw_line(triangle(1), triangle(2))
+            self.draw_line(triangle(2), triangle(0))
+        
+                
 
-e = Engine()
+
+def test():
+    Engine(cube())
+
+test()
